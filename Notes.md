@@ -230,9 +230,115 @@ JSONP has some limitation
 
 - ### skipDataMain
  - If this option is set true then RequireJs will skip data-main attribute and not load the relevant modules.
- 
 
 
+
+# Advance Usage
+
+- To load the packages in CommonJs with requireJs, Then you need to follow the folder structure like this way suppose a package name is cart which contains app.js file then we need to mention in packages option in a array with name, location and main in a object. So name should be cart, location will file location and main will be app.
+
+
+- If we want to load non AMD module then use r.js and commonJs converter that RequireJs can understand.
+
+- RequireJs does not support multiversion with same context.
+
+
+# Handling Error
+
+ - Errback:- Use require() to handle the module error.
+ - Path callbacks:- setup multiple paths to handle the CDN loading error.
+ - Global Error handling:- Use requirejs.onError for catching uncaught errors and logging/debugging
+ - Internet Explorer Compatibility error:- set true enforceDefine to ensure to error detection in IE
+
+
+### Mismatched Anonymous define() Modules Error
+ - If Module loading directly with script and module is using define() without associated to requireJs. Then it will give Module error
+   - To avoid this we can used define with named module Or we should use requireJs Api
+ - If name module and Anonymous module conflicting then RequireJs can't resolve Anonymous property
+
+ - If we are working with loader plugin or anonymous module without without bundling the your file with RequireJs optimiser, then it will give error
+
+ - Declaring var define in your file then it prevent the RequireJs to parsing the modules. To avoid this replace var define; with /*global define */ for linting
+
+
+### Load timeout for modules
+
+ - This error generally come when RequireJs failed to load the module in 7 sec.
+
+ - script Error:-If there is any error like syntex error etc then requireJs failed to load, to debug this see the error in console.
+ if we  are using tool like Firbug then we can open the page in another browser somtimes error didn't show.
+
+ - Incorrect Path Configuration:- If module path is incorrect then RequireJs faild to find the module and give error. To check debug this we need to see network tab where it will indicate that script not found
+
+ - Multiple IDs Pointing to the Same File:
+  - If ModuleIDs are pointing same file with anonymous file then requirejs will be confused. 
+  - to avoid this this the name to anonymous module related to path.
+
+
+### Error Evaluating Module
+ - This error occure when define() encounter a issue while executing the module. This issue shows in conole if module has any error in code.
+
+
+
+
+
+# RequireJS Optimizer
+- The optimizer will only combine those module which are define in require and define() static literals not dynamic module.
+ But dynamic module still can be loaded in runtime.
+- If we want to load dynamic module in optimize file then we need to set modules in include in build.js
+
+- We can build optimizer file using one line commond node r.js -o baseUrl=. paths.jquery=lib/jquery name=app out=app-built.js
+- In commond line Dot(.) reading the object key or make object's key so if you dont't want to make a key then use Build.js file profile.
+
+
+### Shallow exclusions for fast development
+ - If we want to optimize all module in a single file but that one which you are debuging suppose you ar debugging two.js file so use shallow cmd
+ node ../../r.js -o name=main excludeShallow=two out=main-built.js baseUrl=.
+
+
+### empty: paths for network/CDN resources
+ - RequireJs loads uses CDN to load the library. while building the build file these scripts are not include in build file.
+ So to manage this there are two ways
+ 1. we can download this file and save in local
+ 2. In commond make path empty so that browser load the file in runtime dynamically
+ node ../../r.js -o name=main out=main-built.js baseUrl=. paths.jquery=empty:
+
+
+### Optimizing one CSS file
+ - It we wanted to optimize the css then we need to run these commond in css file
+
+ node ../../r.js -o cssIn=main.css out=main-built.css
+
+
+
+### Optimizing a whole project
+- Optimizer can take care of build file into a single folder for that we can build.js file where all relevent directory path is wriiten.
+
+
+### Turbo options
+-Turbo option allow user to build the file without minifying the file. It use when optimization is mroe important than performing. It helps to speedup in development.
+Some useful keys
+1. optimize: "none" - skip minifying
+2. skipDirOptimize: true - only minify the module layers
+3. keepBuildDir: true - already build will not deleted only updated the changes
+4. normalizeDirDefines: "all" - Ensure define() calls in modules
+
+
+
+### Integration with has.js in RequireJS Optimizer
+- Has.js feature has very good use cases in code. Where we can defined which code we wanto minifying which one we want to left. And
+also we can defined the envioronment in build.js file that while optimizing we can set condition true or false.
+
+### Source Maps in RequireJS Optimization
+- Source map are a feature in requirejs which is mapped on minified file means it's convert minified file to unminified. It helps in debuging the code. We can see unminified file in developer tools
+- It uses uglify2 to mapped minified file.
+- set generateSourceMaps to true so it will generate sorcemap file
+- set preserveLicenseComments to false so Disable license comments for source maps to work
+
+### Common Pitfalls
+- Always put dir outside of source directory to prevent nested files
+- Use PATHS to map the external file/library using baseUrl
+- Shim configuration has dependecy to load the library so avoid hosted CDN for optimizer. We can download that in local file. 
 
 
 
