@@ -252,7 +252,7 @@ JSONP has some limitation
 
 
 ### Mismatched Anonymous define() Modules Error
- - If Module loading directly with script and module is using define() without associated to requireJs. Then it will give Module error
+ - If Module loading directly with script, and module is using define() without associated to requireJs. Then it will give Module error
    - To avoid this we can used define with named module Or we should use requireJs Api
  - If name module and Anonymous module conflicting then RequireJs can't resolve Anonymous property
 
@@ -276,10 +276,27 @@ JSONP has some limitation
 
 
 ### Error Evaluating Module
- - This error occure when define() encounter a issue while executing the module. This issue shows in conole if module has any error in code.
+ - This error occure when define() encounter a issue while executing the module. This issue shows in console if module has any error in code.
 
 
+### Module name ... has not been loaded yet for context: ...
+- if require() is called outside of define() in module it will give error
+- A dependency is missing in the define() dependency array
+- There's a space between require and parentheses in older RequireJS versions for example: require() instead require () 
 
+
+### Invalid require call
+- It will occure when dependecy is not mention in array
+- dependencies should use an array to list the dependencies
+
+### No define call for ...
+- Use define() for AMD to load the dependecies
+- Ensure that shim is using for Non AMD library script
+- Test script in multiple broswer to catch the error
+
+
+### Path is not supported: ...
+- 
 
 
 # RequireJS Optimizer
@@ -339,6 +356,99 @@ also we can defined the envioronment in build.js file that while optimizing we c
 - Always put dir outside of source directory to prevent nested files
 - Use PATHS to map the external file/library using baseUrl
 - Shim configuration has dependecy to load the library so avoid hosted CDN for optimizer. We can download that in local file. 
+
+
+
+# Loader Plugins
+
+- requirejs support the loader plugin, which is help to inject non-JavaScript dependencies( HTML,JSON, or CSS) in javascript file. And ensure that they are loaded before the script executed.
+
+- These plugin specify with "plugin!resource" syntex. Here plugin is the name of plugin and resource is path directory of this plugin will load.
+
+### Specify a Text File Dependency
+ - There is no good way to write HTML in javscript as regular HTML. We can write in string HTML but it's very difficult the manage the string HTML.
+ - RequireJs has a plugin text!, that name is text.js. In this file we can write a regular HTML code  
+ - The text.js plugin allows you to load HTML (or other text-based files) as dependencies
+
+###  DOM Ready Dependency (domReady.js)
+ - script can load faster than DOM so it can be give error so manage this issue we can use domReady.js module
+
+
+
+### Define an I18N Bundle
+ - When our app get populor then it's important to developer to that make app in way that app work in local laungauge to help user to understood.
+ - RequireJS provide a I18N plugin to manage different language. It's load plugin before the script load.
+
+
+# Plugin API
+
+- To build the custom plugin we need to set some method inside the plugin module 
+
+ 1. load() - This function is mandatory to build the plugin. It's call the resources
+ 2. normalize - It is optional in plugin but if we want to normalize the name of plugin name then we can use this method
+ 3. write - This method mainly used in optimization to build the file, it's generates optimized code.
+ 4. pluginBuilder - It's specifies that which module is used for optimization while build process
+
+
+### load: function (name, parentRequire, onload, config)
+- Load Function is taking some arguments
+ 1. Name - It is the name of resource which is pass after the ! for example if this is passed 'foo!something/for/foo' then resource name will be something/for/foo.
+ 2. parentRequire - It is a function which is take local require to load the other modules. It's provide other utils
+   - parentRequire.toUrl(moduleResource) - By using this method we can convert module name to Full url
+   - parentRequire.defined(moduleName) - By this method we can check that module is define or not
+   - parentRequire.specified(moduleName) - By this method we can check the module has been loaded or in process
+ 3. onload (Function) - It is a callback that to give infromation to requireJs that module is ready. This should be call with module's value.  If it get error then it will will manage in onload.error method. 
+ 4. config - It is a object where we can define setting of plugin or we can pass the context. When optimizor wil build then it will set isBuild to true
+
+ Note- Some plugin need javascript which is need to extract from text to load as a resource. For that we need to use onload.fromText() to evaluate the javscript.
+ 5. text - The string javscript need to evaluate 
+
+ 6. Build considerations - Optimizor build the file synchronously. If isBuild is true then we are saying optimizer to don't wait for load resources it's loaded successfully. Some plugin load asynchronously in browser so we need to build a logic for.
+
+
+### normalize: function (name, normalize)
+ - Normalize function ensure that name of resource are normalize to cprrect path. It is very helpful when resource name is given in relative path.
+ this function takes two arguments name, normalize
+1. name- This is the resource name
+2. normalize - this is function with is normalize the modules.
+
+
+### write: function (pluginName, moduleName, write)
+- It is noly use for optimizer. This ensure that optimizer are building a single file. And It only require that when optimizer belogs to optimized layer
+
+This function takes 3 arguments
+1. pluginName - plugin name should be pass
+2. moduleName - Normilized name of resources
+3. write - It is a function that is provide the output of content which is provided by plugin, when we want to added content to optimized file. 
+
+
+### onLayerEnd: function (write, data)
+- It is callback which will be trigger when all module is optimized. By this method we can also adds non module code to  each layer of plugin
+- It is also help to reset the internal state of plugin once all module is optimized.
+
+It takes two argument in functions
+- write - A function used to append content to the optimized file.
+- data - An object with two argument
+  1. module name
+  2. path- path of module
+
+
+### writeFile: function (pluginName, name, parentRequire, write)
+ - It is only use for optimizer. It is used when plugin needs to create a additonal output files for its dependencies while optimization process
+ - It is only work when optimizeAllPluginResources: true option is enabled in the RequireJS optimizer's build profile
+
+
+
+### pluginBuilder
+
+ - To implement the pluginBuilder we just need to add a string that will contain path of plugin module which will be load when optimizer will be build optimize file when then this plugin will run in process.
+ 1. Both the plugin and the builder should avoid named define calls
+ 2. It runs in optimizer's envioronment, 
+
+
+
+
+
 
 
 
