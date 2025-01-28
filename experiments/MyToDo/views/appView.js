@@ -4,7 +4,7 @@ define(['jquery','underscore','backbone','collections/todolist','views/todoView'
         events:{
             "keypress #add-todo":'onEnter'
         },
-        intialize:function(){
+        initialize:function(){
             // this.input = this.$("#add-todo")
             // this.list = this.$("#ul-list");
             this.input = this.$("#add-todo");
@@ -14,10 +14,10 @@ define(['jquery','underscore','backbone','collections/todolist','views/todoView'
             // this.listenTo(this.collection,'reset',this.addAll)
             this.listenTo(this.collection,'all',this.render)
 
-            // this.collection.fetch()
+            this.collection.fetch()
         },
         onEnter:function(e){
-            console.log('..s',this.input)
+            console.log('..s',this)
             if (e.which === 13 && this.input.val().trim()) {
                 this.collection.create({ title: this.input.val().trim() });
                 this.input.val("");
