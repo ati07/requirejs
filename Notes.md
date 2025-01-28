@@ -238,7 +238,7 @@ JSONP has some limitation
 - To load the packages in CommonJs with requireJs, Then you need to follow the folder structure like this way suppose a package name is cart which contains app.js file then we need to mention in packages option in a array with name, location and main in a object. So name should be cart, location will file location and main will be app.
 
 
-- If we want to load non AMD module then use r.js and commonJs converter that RequireJs can understand.
+- If we want to load non AMD module then use r.js and commonJs convert that so RequireJs can understand.
 
 - RequireJs does not support multiversion with same context.
 
